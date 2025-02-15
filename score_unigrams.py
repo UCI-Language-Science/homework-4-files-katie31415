@@ -32,12 +32,41 @@
 # You will need to use log and -inf here. 
 # You can add any additional import statements you need here.
 from math import log, inf
+import csv
 
+def train_unigram_model(unigram_list):
+    lower_list = []
+    for name in unigram_list:
+        lower_list.append(name.lower())
+    unigram_dictionary = {}
+    for name in lower_list:
+        unigram_dictionary[name] = unigram_dictionary.get(name,0) + log(1/len(lower_list))
+    return unigram_dictionary
+def score_sentence(dictionary, list_of_strings):
+    sentence_score = 1
+    lower_list = []
+    for name in list_of_strings:
+        lower_list.append(name.lower())
+    for name in lower_list:
+        sentence_score += (dictionary.get(name))
+    return sentence_score
 
-#######################
-# YOUR CODE GOES HERE #
-#######################
-
+def score_unigrams(training_data_path, test_file_path, output_csv_path):
+    folder = training_data_path
+    for txt_file in folder.glob('*.txt'):
+        with open (txt_file, 'r') as file:
+            unigram_list= [line.strip() for line in file]
+            unigram_dictionary = train_unigram_model(unigram_list)
+    
+    with open(output_csv_path, 'w+') as file:
+        writer = csv.DictWriter(file, fieldnames=['sentence', 'unigram_prob'])
+        writer.writeheader()
+        folder = test_file_path
+        for test_file in folder.glob('*.txt'):
+            with open(test_file, 'r') as file:
+                for line in file:
+                    list_of_strings = [line.split(' ')]
+                    writer.writerow({'sentence': line, 'unigram_prob': score_sentence(unigram_dictionary, list_of_strings)})              
 
 
 # Do not modify the following line
